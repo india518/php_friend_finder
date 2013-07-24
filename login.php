@@ -6,14 +6,12 @@
 <!DOCTYPE HTML>
 <html lang="en-US">
 	<head>
-		<!-- jQuery/js -->
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-		<!-- <script src="js/myscript.js"></script> -->
-		<!-- css -->
-		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
-		<!-- <link rel="stylesheet" type="text/css" href="css/login_registration.css"> -->
 		<meta charset="UTF-8">
 		<title>Login and Registration</title>
+		<!-- jQuery/js -->
+		<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
+		<!-- css -->
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
 	</head>
 	<body>
 		<div id="wrapper" class="container">
