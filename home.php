@@ -7,9 +7,7 @@ session_start();
 
 if ($_SESSION["logged_in"])
 {
-	$user = $_SESSION["user"];
-	//require("include/functions.php");
-	//require("include/header.php");
+	$current_user = $_SESSION["user"];
 }
 else
 {
@@ -21,7 +19,7 @@ else
 <html lang="en-US">
 	<head>
 		<meta charset="UTF-8">
-		<title><?= $user["first_name"] ?>'s Friend Finder</title>
+		<title><?= $current_user["first_name"] ?>'s Friend Finder</title>
 		<!-- jQuery/js -->
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 		<!-- <script src="js/myscript.js"></script> -->
@@ -43,8 +41,8 @@ else
 						<button class="btn" type="submit" name="logout">Log Out</button>
 					</form>
 				</div>
-				<p>Welcome, <?= $user["first_name"] ?>!</p>
-				<p><?= $user["email"] ?></p>
+				<p>Welcome, <?= $current_user["first_name"] ?>!</p>
+				<p><?= $current_user["email"] ?></p>
 			</div>
 			<div id="friend_list" class="span9">
 				<?= $_SESSION["friend_table"] ?>

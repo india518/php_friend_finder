@@ -19,9 +19,33 @@ class Process
 				$form = $_POST["action"]; //which form did we come from?
 				$this->signIn($form);
 			}
+			else if ($_POST["action"] == "add_friend")
+			{
+				$friend_user_id = $_POST["add_id"];
+				$status = $this->add_friend($friend_user_id);
+				if($status)
+				{
+					// re-get tables:
+					$friends = $this->get_friends();
+					$_SESSION["friend_table"] = $this->build_friend_table($friends);
+					$users = $this->get_users();
+					$_SESSION["user_table"] = $this->build_user_table($friends, $users);
+					header("location: home.php");
+				}
+				else
+				{
+					echo "Problem creating friendship in the database!";
+					header("location: home.php");
+				}
+			}
+			else if ($_POST["action"] == "logout")
+			{
+				session_destroy();
+				header("location: login.php");
+			}
 		}
 		else
-		{	//We are assuming the user wants to log out - for now
+		{	//User shouldn't get here, lets log out and re-direct to login
 			session_destroy();
 			header("location: login.php");
 		}
@@ -36,65 +60,12 @@ class Process
 
 		if($status)
 		{
-			$data = Array();
-			// HERE IS WHERE WE GET "HOME" PAGE DATA!
+			//$data = Array();
 			$friends = $this->get_friends();
-			if (count($friends) > 0)
-			{
-				$friends_caption = "List of Friends";
-				$friend_table = new HTML_helper;
-				$data["friend_table"] = $friend_table->print_table($friends, $friends_caption);
-			}
-			else
-			{	//no friends :(
-				$data["friend_table"] = "";
-			}
-			$_SESSION["friend_table"] = $data["friend_table"];
-
-
-			//getting the user table:
-			// remember we have $friends already!
+			$_SESSION["friend_table"] = $this->build_friend_table($friends);
 			$users = $this->get_users();
-
-			//NOTE: make this a function?
-			 	$user_caption = "List of Users subscribed to Friend Finder";
-			 	$user_table = new HTML_helper;
-
-		foreach($users as $key=>$user)
-		{
-			$found = FALSE;
-			foreach($friends as $friend)
-			{	
-
-				if ($user['id'] ==  $friend['id']) 
-				{
-					$users[$key]["action"] = "Friends";
-					$found = TRUE;
-				}
-			}
-			if (! $found)
-			{
-				$form  = "<form action='process.php' method='post'>";
-				$form .= "	<button class='btn' type='submit' name='action' value='add_friend' data-user_id='{$user['id']}'>Add Friend</button>";
-				$form .= "</form>";
-				$users[$key]["action"] = $form;
-			}
-		}
-
-		// //
-		// echo "<pre>";
-		// var_dump($users);
-		// echo "</pre>";
-		// die();
-
-
-		//
-
-		$data["user_table"] = $user_table->print_table($users, $user_caption);
-
-			  //
-			 $_SESSION["user_table"] = $data["user_table"];
-			//
+			$_SESSION["user_table"] = $this->build_user_table($friends, $users);
+			
 			header("location: home.php");
 			//echo json_encode($data);
 		}
@@ -260,6 +231,71 @@ _SQL;
 _SQL;
 		return $this->connection->fetch_all($get_friends_query);
 	}
+
+	function build_friend_table($friends)
+	{
+		if (count($friends) > 0)
+		{
+			$friends_caption = "List of Friends";
+			$friend_table = new HTML_helper;
+			return $friend_table->print_table($friends, $friends_caption);
+		}
+		else
+		{	//no friends :(
+			return "";
+		}
+	}
+
+	function build_user_table($friends, $users)
+	{
+		$user_caption = "List of Users subscribed to Friend Finder";
+		$user_table = new HTML_helper;
+
+		foreach($users as $key=>$user)
+		{
+			$found = FALSE;
+			foreach($friends as $friend)
+			{
+				if ($user['id'] ==  $friend['id']) 
+				{
+					$users[$key]["action"] = "Friends";
+					$found = TRUE;
+				}
+			}
+
+			if (! $found)
+			{
+				$form  =<<<_HTML
+					<form action='process.php' method='post'>
+						<!-- Revisit if this is necessary when adding AJAX! -->
+						<input type='hidden' name='add_id' value='{$user['id']}'>
+						<button class='btn' type='submit' name='action' value='add_friend' data-user_id='{$user['id']}'>Add Friend</button>
+					</form>
+_HTML;
+				$users[$key]["action"] = $form;
+			}
+		}
+
+		return $user_table->print_table($users, $user_caption);
+	}
+
+	function add_friend($friend_user_id)
+	{
+		//We need to INSERT INTO the friends join table twice, so that we
+		// have a reciprocal friendship
+		$friendship_query =<<<_SQL
+			INSERT INTO friends (user_id, friend_id)
+			VALUES ({$_SESSION['user']['id']}, {$friend_user_id}),
+			({$friend_user_id}, {$_SESSION['user']['id']})
+_SQL;
+		mysql_query($friendship_query);
+		$count = mysql_affected_rows();
+		if ($count == 2)
+			return TRUE;
+		else
+			return FALSE;
+	}
+
 }
 
 $process = new Process();

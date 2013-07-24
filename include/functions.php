@@ -2,7 +2,6 @@
 
 class HTML_helper
 {
-	
 	function print_table($rows, $caption)
 	{
 		//Takes a 2d array ($rows is an array of rows) and prints out a table
