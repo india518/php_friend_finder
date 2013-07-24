@@ -28,7 +28,7 @@ else
 		<script type="text/javascript">
 			$(document).ready(function(){
 				//alert("Hi");
-				$("#user_list").
+				//$("#user_list").append();
 			});
 		</script>
 
@@ -38,14 +38,19 @@ else
 	<body>
 		<div id="wrapper" class="container">
 			<div id="welcome" class="well">
+				<div class="pull-right">
+					<form id="logout" action="process.php" method="post">
+						<button class="btn" type="submit" name="logout">Log Out</button>
+					</form>
+				</div>
 				<p>Welcome, <?= $user["first_name"] ?>!</p>
 				<p><?= $user["email"] ?></p>
 			</div>
-			<div id="friend_list">
-				<?#= get_friends() ?>
+			<div id="friend_list" class="span9">
+				<?= $_SESSION["friend_table"] ?>
 			</div>
-			<div id="user_list">
-				<?#= get_users() ?>
+			<div id="user_list" class="span9">
+				<?= $_SESSION["user_table"] ?>
 			</div>
 
 		</div> <!-- End of wrapper! -->
