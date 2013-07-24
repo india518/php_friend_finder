@@ -11,10 +11,14 @@ class Process
 	{
 		$this->connection = new Database();
 
-		if (isset($_POST['action']) AND $_POST["action"] == "login")
-			$this->login();
-		else if (isset($_POST['action']) AND $_POST["action"] == "register")
-			$this->register();
+		if (isset($_POST['action']))
+		{
+			if (($_POST["action"] == "login") OR ($_POST["action"] == "register"))
+			{
+				$form = $_POST["action"]; //which form did we come from?
+				$this->signIn($form);
+			}
+		}
 		else
 		{
 			//We are assuming the user wants to log out - for now
@@ -23,12 +27,20 @@ class Process
 		}
 	}
 
-	private function login()
+	function signIn($form)
 	{
-		$status = $this->loginValidation();
+		if ($form == "login")
+			$status = $this->loginValidation();
+		else
+			$status = $this->registerValidation();
 
 		if($status)
+		{
 			header("location: home.php");
+			//
+			// HERE IS WHERE WE GET "HOME" PAGE DATA!
+			//
+		}
 		else
 			header("location: login.php");
 	}
@@ -63,8 +75,7 @@ class Process
 					return FALSE;
 				}
 				else
-				{
-					// The password *is* valid! Populate $_SESSION and log in!
+				{	// The password *is* valid! Populate $_SESSION and log in!
 					$_SESSION["user"] = array(
 						"id" => intval($user["id"]),
 						"first_name" => $user["first_name"],
@@ -81,9 +92,18 @@ class Process
 
 	private function register()
 	{
+		$status = $this->registerValidation();
+
+		if($status)
+			header("location: home.php");
+		else
+			header("location: login.php");
+	}
+
+	private function registerValidation()
+	{
 		$min_password_length = 7;
 		$errors = array();
-
 		//First name validation
 		if (empty($_POST["first_name"]))
 			$errors["first_name"] = "First Name cannot be blank.";
@@ -100,7 +120,6 @@ class Process
 		$message = $this->email_validation();
 		if ($message)
 			$errors["email"] = $message;
-
 		// Password format validation
 		if (empty($_POST["password"]))
 			$errors["password"] = "Password cannot be blank.";
@@ -115,32 +134,39 @@ class Process
 		if (count($errors) > 0)
 		{
 			$_SESSION["error_messages"]["registration"] = $errors;
-			header("location: login.php");
+			return FALSE;
 		}
 		else
-		{
-			//Does user already exists?
+		{	//Does user already exists?
 			$find_user_query = "SELECT users.* FROM users WHERE users.email = '{$_POST['email']}'";
 			$user = $this->connection->fetch_record($find_user_query);
 
 			if ($user)
 			{
 				$_SESSION["error_messages"]["registration"]["user"] = "A user with this email already exists. Try logging in!";
-				
-				header("location: login.php");
+				return FALSE;
 			}
 			else
-			{
-				//NEXT: we have a new, unique user. Stick 'em in the database!
+			{	//NEXT: we have a new, unique user. Stick 'em in the database!
 				$first_name = mysql_real_escape_string($_POST["first_name"]);
 				$last_name = mysql_real_escape_string($_POST["last_name"]);
 				$email = mysql_real_escape_string($_POST["email"]);
 				$password = md5(mysql_real_escape_string($_POST["password"]));
 				$insert_user_query = "INSERT INTO users (first_name, last_name, email, password, created_at) VALUES ('{$first_name}', '{$last_name}', '{$email}', '{$password}', NOW())";
 				mysql_query($insert_user_query);
+				$id = mysql_insert_id();
 				//NOTE: At some point, add the validation for mysql_affected_id or whatever here...
 
-				header("location: home.php");
+				//populate $_SESSION and let the new kid in to play!
+				$_SESSION["user"] = array(
+						"id" => $id,
+						"first_name" => $first_name,
+						"full_name" => "{$first_name} {$last_name}",
+						"email" => $email
+				);
+
+				$_SESSION["logged_in"] = TRUE;
+				return TRUE;
 			}
 		}
 	} //end registration()
