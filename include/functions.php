@@ -18,7 +18,7 @@ class HTML_helper
 		{
 			//NOTE: REMOVE following if, in order to dipslay ID number!
 			if ($key != "id")
-				$html .= "<th>" . $key . "</th>";
+				$html .= "<th>" . ucfirst($key) . "</th>";
 		}
 		$html .= "
 					</tr>
