@@ -41,5 +41,4 @@ class HTML_helper
 	}
 }
 
-
 ?>

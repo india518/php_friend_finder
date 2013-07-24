@@ -204,11 +204,12 @@ class Process
 
 	function get_users()
 	{
-		//NOTE: this gets all users, but not the info about if they are 
-		// friends with current user - will have to add that in!
+		//NOTE: this gets all users, (except current user) but not whether
+		// they are friends with current user - will have to add that in!
 		$get_users_query =<<<_SQL
 			SELECT CONCAT(users.first_name,' ',users.last_name) AS name, users.email
 			FROM users
+			WHERE users.id != '{$_SESSION['user']['id']}'
 _SQL;
 		return $this->connection->fetch_all($get_users_query);
 	}
