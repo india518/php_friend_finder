@@ -21,8 +21,7 @@ class Process
 			}
 		}
 		else
-		{
-			//We are assuming the user wants to log out - for now
+		{	//We are assuming the user wants to log out - for now
 			session_destroy();
 			header("location: login.php");
 		}
@@ -42,9 +41,9 @@ class Process
 			$friends = $this->get_friends();
 			if (count($friends) > 0)
 			{
-				$caption = "List of Friends";
+				$friends_caption = "List of Friends";
 				$friend_table = new HTML_helper;
-				$data["friend_table"] = $friend_table->print_table($friends, $caption);
+				$data["friend_table"] = $friend_table->print_table($friends, $friends_caption);
 			}
 			else
 			{	//no friends :(
@@ -52,12 +51,49 @@ class Process
 			}
 			$_SESSION["friend_table"] = $data["friend_table"];
 
+
+			//getting the user table:
+			// remember we have $friends already!
 			$users = $this->get_users();
+
 			//NOTE: make this a function?
-			  $caption = "List of Users subscribed to Friend Finder";
-			  $user_table = new HTML_helper;
-			  $data["user_table"] = $user_table->print_table($users, $caption);
-			  $_SESSION["user_table"] = $data["user_table"];
+			 	$user_caption = "List of Users subscribed to Friend Finder";
+			 	$user_table = new HTML_helper;
+
+		foreach($users as $key=>$user)
+		{
+			$found = FALSE;
+			foreach($friends as $friend)
+			{	
+
+				if ($user['id'] ==  $friend['id']) 
+				{
+					$users[$key]["action"] = "Friends";
+					$found = TRUE;
+				}
+			}
+			if (! $found)
+			{
+				$form  = "<form action='process.php' method='post'>";
+				$form .= "	<button class='btn' type='submit' name='action' value='add_friend' data-user_id='{$user['id']}'>Add Friend</button>";
+				$form .= "</form>";
+				$users[$key]["action"] = $form;
+			}
+		}
+
+		// //
+		// echo "<pre>";
+		// var_dump($users);
+		// echo "</pre>";
+		// die();
+
+
+		//
+
+		$data["user_table"] = $user_table->print_table($users, $user_caption);
+
+			  //
+			 $_SESSION["user_table"] = $data["user_table"];
 			//
 			header("location: home.php");
 			//echo json_encode($data);
@@ -207,7 +243,7 @@ class Process
 		//NOTE: this gets all users, (except current user) but not whether
 		// they are friends with current user - will have to add that in!
 		$get_users_query =<<<_SQL
-			SELECT CONCAT(users.first_name,' ',users.last_name) AS name, users.email
+			SELECT CONCAT(users.first_name,' ',users.last_name) AS name, users.email, users.id
 			FROM users
 			WHERE users.id != '{$_SESSION['user']['id']}'
 _SQL;
@@ -217,7 +253,7 @@ _SQL;
 	function get_friends()
 	{
 		$get_friends_query =<<<_SQL
-			SELECT CONCAT(users.first_name,' ',users.last_name) AS name, users.email
+			SELECT CONCAT(users.first_name,' ',users.last_name) AS name, users.email, users.id
 			FROM users
 			JOIN friends ON users.id = friends.user_id
 			WHERE friends.friend_id = '{$_SESSION['user']['id']}'
