@@ -59,16 +59,15 @@ class Process
 			$status = $this->registerValidation();
 
 		if($status)
-		{
-			//$data = Array();
+		{	//this is when the page loads, so not called from AJAX
 			$friends = $this->get_friends();
-			$_SESSION["friend_table"] = $this->build_friend_table($friends);
-			//$data["friend_table"] = $this->build_friend_table($friends);
 			$users = $this->get_users();
+			$_SESSION["friend_table"] = $this->build_friend_table($friends);
 			$_SESSION["user_table"] = $this->build_user_table($friends, $users);
-			//$data["user_table"] = $this->build_user_table($friends, $users);
-			
 			header("location: home.php");
+			//$data = Array();
+			//$data["friend_table"] = $this->build_friend_table($friends);
+			//$data["user_table"] = $this->build_user_table($friends, $users);
 			//echo json_encode($data);
 		}
 		else
@@ -97,8 +96,7 @@ class Process
 					return FALSE;
 			}
 			else // we found a user!
-			{
-				// but is their password valid?
+			{	// but is their password valid?
 				if (md5($_POST["password"]) != $user["password"])
 				{
 					$_SESSION["error_messages"]["login"]["password"] = "Incorrect password.";

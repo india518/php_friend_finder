@@ -16,21 +16,7 @@ else
 		<!-- <script src="js/myscript.js"></script> -->
 		<script type="text/javascript">
 			$(document).ready(function(){
-				//alert("Hi");
-
-				// $(document).on("submit", "#add_friend", function(){
-				// 	$.post(
-				// 		$(this).attr("action"),
-				// 		$(this).serialize(),
-				// 		function(data){
-				// 			("#friend_list").html(data["friend_table"]);
-				// 			("#user_list").html(data["user_table"]);
-				// 		},
-				// 		"json"
-				// 	);
-				// 	return false;
-				// });
-
+				
 				$(document).on("submit", ".add_friend", function(){
 					$.post(
 						$(this).attr("action"),

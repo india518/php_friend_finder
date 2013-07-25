@@ -7,8 +7,6 @@
 	<head>
 		<meta charset="UTF-8">
 		<title>Login and Registration</title>
-		<!-- jQuery/js -->
-		<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script> -->
 		<!-- css -->
 		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css">
 	</head>
