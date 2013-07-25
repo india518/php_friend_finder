@@ -30,7 +30,28 @@ class Process
 					$data["friend_table"] = $this->build_friend_table($friends);
 					$users = $this->get_users();
 					$data["user_table"] = $this->build_user_table($friends, $users);
+
+					//update $_SESSION variables in case of page reload:
+					$_SESSION["friend_table"] = $this->build_friend_table($friends);
+					$_SESSION["user_table"] = $this->build_user_table($friends, $users);
 					echo json_encode($data);
+					//NOTE: Question to Chris
+					//Is it better to set the session variables as above, or
+					// should I do something more like this:
+
+					/*
+					$friends = $this->get_friends();
+					$_SESSION["friend_table"] = $this->build_friend_table($friends);
+					$users = $this->get_users();
+					$_SESSION["user_table"] = $this->build_user_table($friends, $users);
+					echo json_encode($_SESSION);
+					*/
+
+					//PROs: No need for an extra array variable ($data)
+					//Cons: We're sending the WHOLE session back, when we
+					// really just need two items in $_SESSION. Could
+					// this turn out to be a bad practice, in a complicated app
+					// with much more info in session?
 				}
 				else
 				{
