@@ -1,7 +1,7 @@
 <?php
 
 include_once("connection.php");
-require("include/functions.php");
+require("include/HTML_helper.php");
 session_start();
 
 class Process
@@ -24,17 +24,17 @@ class Process
 				$friend_user_id = $_POST["add_id"];
 				$status = $this->add_friend($friend_user_id);
 				if($status)
-				{
-					// re-get tables:
+				{	// refresh friend table:
+					$data = Array();
 					$friends = $this->get_friends();
-					$_SESSION["friend_table"] = $this->build_friend_table($friends);
+					$data["friend_table"] = $this->build_friend_table($friends);
 					$users = $this->get_users();
-					$_SESSION["user_table"] = $this->build_user_table($friends, $users);
-					header("location: home.php");
+					$data["user_table"] = $this->build_user_table($friends, $users);
+					echo json_encode($data);
 				}
 				else
 				{
-					echo "Problem creating friendship in the database!";
+					$_SESSION["add_friend_error"] = "Problem creating friendship in the database!";
 					header("location: home.php");
 				}
 			}
@@ -63,8 +63,10 @@ class Process
 			//$data = Array();
 			$friends = $this->get_friends();
 			$_SESSION["friend_table"] = $this->build_friend_table($friends);
+			//$data["friend_table"] = $this->build_friend_table($friends);
 			$users = $this->get_users();
 			$_SESSION["user_table"] = $this->build_user_table($friends, $users);
+			//$data["user_table"] = $this->build_user_table($friends, $users);
 			
 			header("location: home.php");
 			//echo json_encode($data);
@@ -209,6 +211,10 @@ class Process
 		return $message;
 	}
 
+	// NOTE: Should the following function
+	//  get_users(), get_friends(), build_friend_table, build_user_table
+	// be in another class somewhere? Do they still belong in Process?
+
 	function get_users()
 	{
 		//NOTE: this gets all users, (except current user) but not whether
@@ -266,10 +272,12 @@ _SQL;
 			if (! $found)
 			{
 				$form  =<<<_HTML
-					<form action='process.php' method='post'>
-						<!-- Revisit if this is necessary when adding AJAX! -->
-						<input type='hidden' name='add_id' value='{$user['id']}'>
-						<button class='btn' type='submit' name='action' value='add_friend' data-user_id='{$user['id']}'>Add Friend</button>
+					<form class='add_friend' action='process.php' method='post'>
+						<!-- ARG! -->
+						<!-- The values stored in Input type="submit" does not get submitted in the form via Ajax! -->
+						<input type='hidden' name='add_id' value='{$user['id']}' />
+						<input type='hidden' name='action' value='add_friend' data-user_id='{$user['id']}' />
+						<button class='btn' type='submit'>Add Friend</button>
 					</form>
 _HTML;
 				$users[$key]["action"] = $form;

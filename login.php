@@ -1,7 +1,6 @@
 <?php
 	session_start();
 	require("connection.php");
-	// require("include/functions.php");
 ?>
 <!DOCTYPE HTML>
 <html lang="en-US">
